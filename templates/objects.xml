@@ -2,8 +2,8 @@
     <var name='id' value='{{ id }}'/>
     <var name='level' value='{{ level }}'/>
     <objects>
-        {% for object in objects %}
+        {%- for object in objects %}
             <object name='{{ object }}'/>
-        {% endfor %}
+        {%- endfor %}
     </objects>
 </root>

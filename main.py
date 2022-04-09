@@ -1,16 +1,33 @@
-# This is a sample Python script.
+from random import randint
+from uuid import uuid4
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+from faker import Faker
+from jinja2 import Environment, PackageLoader, select_autoescape
 
 
-# Press the green button in the gutter to run the script.
+FAKE = Faker('ru_RU')
+
+
+def generate_objects(objects_count: int = 100):
+    for object_number in range(objects_count):
+        yield {
+            "id": uuid4(),
+            "level": randint(0, 100),
+            "objects": [FAKE.company() for _ in range(randint(1, 10))],
+            "number": object_number
+        }
+
+
+def save_objects():
+    env = Environment(
+        loader=PackageLoader("main"),
+        autoescape=select_autoescape(enabled_extensions=('xml',))
+    )
+    template = env.get_template("objects.xml")
+    for generated_object in generate_objects():
+        template.stream(**generated_object).dump(
+            f'results/object{generated_object["number"]}.xml')
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    save_objects()
