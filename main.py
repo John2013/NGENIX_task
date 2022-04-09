@@ -1,3 +1,4 @@
+import shutil
 from random import randint
 from uuid import uuid4
 
@@ -26,8 +27,18 @@ def save_objects():
     template = env.get_template("objects.xml")
     for generated_object in generate_objects():
         template.stream(**generated_object).dump(
-            f'results/object{generated_object["number"]}.xml')
+            f'xmls/object{generated_object["number"]}.xml')
+
+
+def archive_objects(archive_number: int):
+    shutil.make_archive(f'archives/objects_{archive_number}', 'zip', 'xmls')
+
+
+def make_archives(archives_count: int = 50):
+    for archive_number in range(archives_count):
+        save_objects()
+        archive_objects(archive_number)
 
 
 if __name__ == '__main__':
-    save_objects()
+    make_archives()
