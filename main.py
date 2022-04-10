@@ -91,7 +91,7 @@ def collect_archive(archive_number: int):
 def collect_objects_data() -> tuple[list[tuple[str, int]], list[tuple[str, list[str]]]]:
     levels: list[tuple[str, int]] = []
     objects: list[tuple[str, list[str]]] = []
-    with Pool(6) as pool:
+    with Pool(os.cpu_count()) as pool:
         parts = pool.map(collect_archive, range(ARCHIVES_COUNT))
     for part_levels, part_objects in parts:
         levels.extend(part_levels)
