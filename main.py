@@ -2,6 +2,7 @@ import csv
 import os
 import shutil
 import zipfile
+from multiprocessing import Pool
 from random import randint
 from typing import Iterable
 from uuid import uuid4
@@ -43,7 +44,7 @@ def save_objects():
         )
 
 
-def archive_objects(archive_number: int):
+def zip_objects(archive_number: int):
     shutil.make_archive(
         os.path.join("archives", f"objects_{archive_number}"), "zip", "xmls"
     )
@@ -52,7 +53,7 @@ def archive_objects(archive_number: int):
 def make_archives():
     for archive_number in range(ARCHIVES_COUNT):
         save_objects()
-        archive_objects(archive_number)
+        zip_objects(archive_number)
 
 
 def unzip_objects(archive_number: int):
@@ -76,15 +77,25 @@ def parse_object(archive_number: int, object_number: int) -> tuple[str, int, lis
     return object_id, level, objects
 
 
+def collect_archive(archive_number: int):
+    levels: list[tuple[str, int]] = []
+    objects: list[tuple[str, list[str]]] = []
+    unzip_objects(archive_number)
+    for object_number in range(OBJECTS_COUNT):
+        object_id, level, objects_list = parse_object(archive_number, object_number)
+        levels.append((object_id, level))
+        objects.append((object_id, objects_list))
+    return levels, objects
+
+
 def collect_objects_data() -> tuple[list[tuple[str, int]], list[tuple[str, list[str]]]]:
     levels: list[tuple[str, int]] = []
     objects: list[tuple[str, list[str]]] = []
-    for archive_number in range(ARCHIVES_COUNT):
-        unzip_objects(archive_number)
-        for object_number in range(OBJECTS_COUNT):
-            object_id, level, objects_list = parse_object(archive_number, object_number)
-            levels.append((object_id, level))
-            objects.append((object_id, objects_list))
+    with Pool(6) as pool:
+        parts = pool.map(collect_archive, range(ARCHIVES_COUNT))
+    for part_levels, part_objects in parts:
+        levels.extend(part_levels)
+        objects.extend(part_objects)
     return levels, objects
 
 
