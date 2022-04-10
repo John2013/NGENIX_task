@@ -93,7 +93,7 @@ def save_csv(levels: list[tuple[str, int]], objects: list[tuple[str, list[str]]]
         writer = csv.writer(csv_levels)
         writer.writerow(("id", "level"))
         writer.writerows(levels)
-    with open("objects.csv", "w", newline="") as scv_objects:
+    with open("objects.csv", "w", newline="", encoding="utf-8") as scv_objects:
         writer = csv.writer(scv_objects)
         writer.writerow(("id", "object"))
         for object_id, object_list in objects:
